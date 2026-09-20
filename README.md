@@ -1,75 +1,28 @@
-# React + TypeScript + Vite
+# LeetGlint
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+LeetGlint is a restrained Chrome extension for LeetCode. It appears in exactly two moments: when a problem statement is confusing, and when a user has a failed test. It gives one nudge and then steps away.
 
-Currently, two official plugins are available:
+## Two trigger moments
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Clarify a confusing problem statement
+   - The extension adds a Clarify button near the problem header.
+   - It rephrases the ambiguous wording in plain English without giving strategy or a solution.
 
-## React Compiler
+2. Get a hint after a failing test
+   - The extension hooks into the test result state and adds a Hint button when the run is wrong.
+   - Each level narrows the bug without revealing corrected code.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## One nudge, then stop
 
-## Expanding the ESLint configuration
+The product philosophy is intentionally narrow: never coach a full session, never reveal a full solution, and never keep escalating after the user has already gotten a useful pointer. The extension limits hint escalation to three levels and clarify escalation to two levels.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Setup
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. Install dependencies with `npm install`.
+2. Run `npm run build`.
+3. Open Chrome and choose Load unpacked.
+4. Point Chrome at the generated `dist` folder.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Provider setup
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Open the options page to choose a provider and paste your API key. The key is stored only in Chrome local storage.
