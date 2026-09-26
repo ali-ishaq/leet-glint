@@ -12,14 +12,29 @@ interface ClarifyResponse {
 interface ClarifyButtonProps {
   level: number;
   onRequest: (kind: "clarify" | "hint", level: number) => Promise<string>;
-  pillClassName?: string;
 }
 
-export function ClarifyButton({
-  level,
-  onRequest,
-  pillClassName,
-}: ClarifyButtonProps) {
+function ClarifyIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.2 9.4a2.8 2.8 0 0 1 5.6.1c0 1.9-2.8 2.2-2.8 3.9" />
+      <path d="M12 17.3h.01" />
+    </svg>
+  );
+}
+
+export function ClarifyButton({ level, onRequest }: ClarifyButtonProps) {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<ClarifyResponse | null>(null);
 
@@ -86,14 +101,10 @@ export function ClarifyButton({
     await request();
   }
 
-  const buttonClassName = pillClassName
-    ? `${pillClassName} leetglint-clarify-trigger`
-    : "leetglint-trigger leetglint-clarify-trigger";
-
   return (
     <div className="leetglint-inline" data-kind="clarify" ref={anchorRef}>
       <button
-        className={buttonClassName}
+        className="leetglint-trigger"
         type="button"
         onClick={handleClick}
         disabled={loading}
@@ -101,7 +112,12 @@ export function ClarifyButton({
         aria-busy={loading || undefined}
         aria-expanded={showPanel}
       >
-        <span className="leetglint-trigger-label">{label}</span>
+        <span className="leetglint-trigger-label">
+          <span className="leetglint-trigger-icon">
+            <ClarifyIcon />
+          </span>
+          {label}
+        </span>
         <span className="leetglint-trigger-spinner" aria-hidden="true">
           <Spinner size={14} />
         </span>

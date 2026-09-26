@@ -164,6 +164,8 @@ function createApp() {
   }
 
   function attachClarify() {
+    // The difficulty pill is only used to find where the trigger belongs; the
+    // button itself is styled to match the Submit button, not the pill.
     const difficulty = document.querySelector<HTMLElement>(
       '[class*="text-difficulty-"]',
     );
@@ -182,18 +184,11 @@ function createApp() {
       pillContainer.appendChild(anchor);
     }
 
-    const pillClassName = difficulty.className
-      .split(/\s+/)
-      .filter((className) => !className.includes("text-difficulty-"))
-      .concat("leetglint-clarify-button")
-      .join(" ");
-
     if (!clarifyAnchor) {
       createRoot(anchor).render(
         <ClarifyButton
           level={state.clarityLevel + 1}
           onRequest={handleAction}
-          pillClassName={pillClassName}
         />,
       );
     }

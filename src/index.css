@@ -13,6 +13,13 @@
   --success-bg: #173b30;
   --error: #ff9387;
   --error-bg: #432421;
+  /*
+   * LeetCode's action green, the same token its Submit button uses
+   * (text-green-60). Resolved from the page stylesheet when it exposes the
+   * custom property so the triggers follow the site theme, with a fallback for
+   * when it does not.
+   */
+  --leetglint-action: var(--color-green-60, #00b58e);
   font-family: "Jost", "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--paper);
@@ -74,10 +81,6 @@ select {
   margin-left: auto;
 }
 
-.leetglint-clarify-button {
-  cursor: pointer;
-}
-
 .leetglint-spinner {
   display: inline-flex;
   align-items: center;
@@ -85,25 +88,59 @@ select {
 }
 
 /*
- * Clarify pill adopts LeetCode's own difficulty-pill styling, so the loading
- * state is layered on with a dedicated hook class instead of .leetglint-trigger.
+ * Mirrors LeetCode's own Submit button: transparent background, action-green
+ * text, and a faint tint of that same green on hover instead of a colour swap.
+ * Rounded just enough to read as a related but distinct affordance, since
+ * Submit itself is square.
  */
-.leetglint-clarify-trigger,
-.leetglint-pill-loading {
+.leetglint-trigger {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--leetglint-action);
+  padding: 0.375rem 0.75rem;
+  font-family: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition-property: color, background-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
 }
 
-.leetglint-clarify-trigger:disabled,
-.leetglint-pill-loading:disabled {
+.leetglint-trigger:hover:not(:disabled) {
+  background: rgb(0 181 142 / 10%);
+  background: color-mix(in srgb, var(--leetglint-action) 10%, transparent);
+}
+
+.leetglint-trigger:focus-visible {
+  outline: 2px solid var(--leetglint-action);
+  outline-offset: 1px;
+}
+
+.leetglint-trigger:disabled {
+  opacity: 0.6;
   cursor: progress;
 }
 
+.leetglint-trigger-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
 .leetglint-trigger-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
   transition: opacity 120ms ease;
 }
 
 /*
- * The spinner is absolutely positioned over the label so the pill keeps an
+ * The spinner is absolutely positioned over the label so the button keeps an
  * identical width in both states and the surrounding page never reflows.
  */
 .leetglint-trigger-spinner {
@@ -117,35 +154,12 @@ select {
   transition: opacity 120ms ease;
 }
 
-.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-label,
-.leetglint-pill-loading[data-loading="true"] .leetglint-trigger-label {
+.leetglint-trigger[data-loading="true"] .leetglint-trigger-label {
   opacity: 0;
 }
 
-.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-spinner,
-.leetglint-pill-loading[data-loading="true"] .leetglint-trigger-spinner {
+.leetglint-trigger[data-loading="true"] .leetglint-trigger-spinner {
   opacity: 1;
-}
-
-.leetglint-trigger {
-  border: 0;
-  border-radius: 5px;
-  background: var(--primary);
-  color: #17221f;
-  padding: 0.45rem 0.8rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.leetglint-trigger:hover:not(:disabled) {
-  background: var(--primary-dark);
-}
-
-.leetglint-trigger:disabled {
-  opacity: 0.6;
-  cursor: wait;
 }
 
 .leetglint-panel {
