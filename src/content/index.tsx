@@ -4,9 +4,8 @@ import { ClarifyButton } from "./ClarifyButton";
 import { HintButton } from "./HintButton";
 import { HINT_PROMPTS, CLARIFY_PROMPTS } from "../shared/prompts";
 import { readSettings } from "../shared/storage";
+import "./markdownStyles";
 import "../index.css";
-
-const APP_ID = "leetglint-root";
 
 function stableHash(value: string): string {
   let hash = 0;
@@ -52,12 +51,6 @@ async function requestAi(
 }
 
 function createApp() {
-  const rootElement = document.createElement("div");
-  rootElement.id = APP_ID;
-  rootElement.className = "leetglint-root";
-  const root = createRoot(rootElement);
-  document.body.appendChild(rootElement);
-
   const state = {
     clarityLevel: 0,
     hintLevel: 0,
@@ -122,16 +115,39 @@ function createApp() {
   }
 
   function attachClarify() {
-    const buttons = (
-      <div>
+    const difficulty = document.querySelector<HTMLElement>(
+      '[class*="text-difficulty-"]',
+    );
+    const pillContainer = difficulty?.parentElement;
+    if (!pillContainer) {
+      return;
+    }
+
+    const clarifyAnchor = pillContainer.querySelector<HTMLElement>(
+      ".leetglint-clarify-anchor",
+    );
+    const anchor = clarifyAnchor ?? document.createElement("div");
+    anchor.className = "leetglint-clarify-anchor";
+
+    if (pillContainer.lastElementChild !== anchor) {
+      pillContainer.appendChild(anchor);
+    }
+
+    const pillClassName = difficulty.className
+      .split(/\s+/)
+      .filter((className) => !className.includes("text-difficulty-"))
+      .concat("leetglint-clarify-button")
+      .join(" ");
+
+    if (!clarifyAnchor) {
+      createRoot(anchor).render(
         <ClarifyButton
           level={state.clarityLevel + 1}
           onRequest={handleAction}
-        />
-      </div>
-    );
-
-    root.render(buttons);
+          pillClassName={pillClassName}
+        />,
+      );
+    }
   }
 
   function attachHint() {

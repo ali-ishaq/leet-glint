@@ -1,0 +1,114 @@
+/*
+ * Syntax highlighting theme for the Clarify popover.
+ *
+ * Derived from highlight.js' "github-dark" theme
+ * (https://github.com/highlightjs/highlight.js/blob/main/src/styles/github-dark.css),
+ * with the layout rules dropped and every selector scoped to
+ * .leetglint-markdown so it cannot leak into the LeetCode page.
+ *
+ * The theme is kept in-tree rather than imported from node_modules because
+ * @crxjs/vite-plugin cannot map a stylesheet that lives in node_modules to an
+ * emitted content-script asset. See vite.config.ts for the equivalent
+ * treatment of KaTeX.
+ */
+
+.leetglint-markdown .hljs {
+  color: #c9d1d9;
+  background: #0d1117
+}
+.leetglint-markdown .hljs-doctag,
+.leetglint-markdown .hljs-keyword,
+.leetglint-markdown .hljs-meta .hljs-keyword,
+.leetglint-markdown .hljs-template-tag,
+.leetglint-markdown .hljs-template-variable,
+.leetglint-markdown .hljs-type,
+.leetglint-markdown .hljs-variable.language_ {
+  /* prettylights-syntax-keyword */
+  color: #ff7b72
+}
+.leetglint-markdown .hljs-title,
+.leetglint-markdown .hljs-title.class_,
+.leetglint-markdown .hljs-title.class_.inherited__,
+.leetglint-markdown .hljs-title.function_ {
+  /* prettylights-syntax-entity */
+  color: #d2a8ff
+}
+.leetglint-markdown .hljs-attr,
+.leetglint-markdown .hljs-attribute,
+.leetglint-markdown .hljs-literal,
+.leetglint-markdown .hljs-meta,
+.leetglint-markdown .hljs-number,
+.leetglint-markdown .hljs-operator,
+.leetglint-markdown .hljs-variable,
+.leetglint-markdown .hljs-selector-attr,
+.leetglint-markdown .hljs-selector-class,
+.leetglint-markdown .hljs-selector-id {
+  /* prettylights-syntax-constant */
+  color: #79c0ff
+}
+.leetglint-markdown .hljs-regexp,
+.leetglint-markdown .hljs-string,
+.leetglint-markdown .hljs-meta .hljs-string {
+  /* prettylights-syntax-string */
+  color: #a5d6ff
+}
+.leetglint-markdown .hljs-built_in,
+.leetglint-markdown .hljs-symbol {
+  /* prettylights-syntax-variable */
+  color: #ffa657
+}
+.leetglint-markdown .hljs-comment,
+.leetglint-markdown .hljs-code,
+.leetglint-markdown .hljs-formula {
+  /* prettylights-syntax-comment */
+  color: #8b949e
+}
+.leetglint-markdown .hljs-name,
+.leetglint-markdown .hljs-quote,
+.leetglint-markdown .hljs-selector-tag,
+.leetglint-markdown .hljs-selector-pseudo {
+  /* prettylights-syntax-entity-tag */
+  color: #7ee787
+}
+.leetglint-markdown .hljs-subst {
+  /* prettylights-syntax-storage-modifier-import */
+  color: #c9d1d9
+}
+.leetglint-markdown .hljs-section {
+  /* prettylights-syntax-markup-heading */
+  color: #1f6feb;
+  font-weight: bold
+}
+.leetglint-markdown .hljs-bullet {
+  /* prettylights-syntax-markup-list */
+  color: #f2cc60
+}
+.leetglint-markdown .hljs-emphasis {
+  /* prettylights-syntax-markup-italic */
+  color: #c9d1d9;
+  font-style: italic
+}
+.leetglint-markdown .hljs-strong {
+  /* prettylights-syntax-markup-bold */
+  color: #c9d1d9;
+  font-weight: bold
+}
+.leetglint-markdown .hljs-addition {
+  /* prettylights-syntax-markup-inserted */
+  color: #aff5b4;
+  background-color: #033a16
+}
+.leetglint-markdown .hljs-deletion {
+  /* prettylights-syntax-markup-deleted */
+  color: #ffdcd7;
+  background-color: #67060c
+}
+.leetglint-markdown .hljs-char.escape_,
+.leetglint-markdown .hljs-link,
+.leetglint-markdown .hljs-params,
+.leetglint-markdown .hljs-property,
+.leetglint-markdown .hljs-punctuation,
+.leetglint-markdown .hljs-tag {
+  /* purposely ignored */
+  
+}

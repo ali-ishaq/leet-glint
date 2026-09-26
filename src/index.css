@@ -68,6 +68,61 @@ select {
   gap: 0.5rem;
 }
 
+.leetglint-clarify-anchor {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.leetglint-clarify-button {
+  cursor: pointer;
+}
+
+.leetglint-spinner {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+/*
+ * Clarify pill adopts LeetCode's own difficulty-pill styling, so the loading
+ * state is layered on with a dedicated hook class instead of .leetglint-trigger.
+ */
+.leetglint-clarify-trigger {
+  position: relative;
+}
+
+.leetglint-clarify-trigger:disabled {
+  cursor: progress;
+}
+
+.leetglint-trigger-label {
+  transition: opacity 120ms ease;
+}
+
+/*
+ * The spinner is absolutely positioned over the label so the pill keeps an
+ * identical width in both states and the surrounding page never reflows.
+ */
+.leetglint-trigger-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-label {
+  opacity: 0;
+}
+
+.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-spinner {
+  opacity: 1;
+}
+
 .leetglint-trigger {
   border: 0;
   border-radius: 5px;
@@ -116,6 +171,292 @@ select {
 
 .leetglint-error {
   color: var(--error);
+}
+
+/*
+ * Clarify response popover.
+ *
+ * Rendered into a portal on <body> and positioned with position: fixed, so it
+ * is never trapped by a stacking context or overflow:hidden on the LeetCode
+ * problem header. ClarifyButton writes top/left/data-placement directly onto
+ * the node on every scroll, resize and content resize.
+ */
+.leetglint-popover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, calc(100vw - 24px));
+  max-height: min(62vh, 460px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: "Jost", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 55%);
+  opacity: 0;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.leetglint-popover[data-placement="bottom"] {
+  transform-origin: top left;
+}
+
+.leetglint-popover[data-placement="top"] {
+  transform-origin: bottom left;
+}
+
+.leetglint-popover[data-placement="bottom"][data-state="exited"] {
+  transform: translateY(-4px) scale(0.96);
+}
+
+.leetglint-popover[data-placement="top"][data-state="exited"] {
+  transform: translateY(4px) scale(0.96);
+}
+
+.leetglint-popover[data-state="entered"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.leetglint-popover-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.leetglint-regenerate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.22rem 0.42rem;
+  background: #10251f;
+  color: var(--ink);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.leetglint-regenerate:hover:not(:disabled) {
+  background: #214338;
+  border-color: #2a5142;
+}
+
+.leetglint-regenerate:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.leetglint-popover-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.7rem 0.9rem 0.8rem;
+}
+
+.leetglint-popover-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.leetglint-popover p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.leetglint-error {
+  white-space: pre-wrap;
+}
+
+.leetglint-markdown-plain {
+  white-space: pre-wrap;
+}
+
+/* Markdown / LaTeX / code rendering inside the popover. */
+.leetglint-markdown {
+  font-size: 0.86rem;
+  line-height: 1.55;
+  overflow-wrap: break-word;
+}
+
+.leetglint-markdown > :first-child {
+  margin-top: 0;
+}
+
+.leetglint-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.leetglint-markdown h1,
+.leetglint-markdown h2,
+.leetglint-markdown h3,
+.leetglint-markdown h4,
+.leetglint-markdown h5,
+.leetglint-markdown h6 {
+  margin: 0.9em 0 0.35em;
+  font-family: "Jost", "Segoe UI", sans-serif;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.leetglint-markdown h1 {
+  font-size: 1.05rem;
+}
+
+.leetglint-markdown h2 {
+  font-size: 0.98rem;
+}
+
+.leetglint-markdown h3 {
+  font-size: 0.9rem;
+}
+
+.leetglint-markdown h4,
+.leetglint-markdown h5,
+.leetglint-markdown h6 {
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.leetglint-markdown p {
+  margin: 0 0 0.6em;
+}
+
+.leetglint-markdown ul,
+.leetglint-markdown ol {
+  margin: 0 0 0.6em;
+  padding-left: 1.3em;
+}
+
+.leetglint-markdown li {
+  margin: 0.15em 0;
+}
+
+.leetglint-markdown li > p {
+  margin: 0 0 0.3em;
+}
+
+.leetglint-markdown strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.leetglint-markdown a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.leetglint-markdown blockquote {
+  margin: 0 0 0.6em;
+  padding: 0.1rem 0 0.1rem 0.7rem;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+
+.leetglint-markdown hr {
+  margin: 0.8em 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.leetglint-markdown code {
+  padding: 0.1em 0.34em;
+  border-radius: 3px;
+  background: #10251f;
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-size: 0.88em;
+}
+
+.leetglint-markdown pre {
+  margin: 0 0 0.6em;
+}
+
+.leetglint-markdown pre code {
+  display: block;
+  overflow-x: auto;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+/* The popover is portalled into the LeetCode document, so the syntax theme
+   only supplies token colours; the box styling comes from the design tokens. */
+.leetglint-markdown pre code.hljs {
+  background: #0b1a15;
+}
+
+.leetglint-markdown table {
+  width: 100%;
+  margin: 0 0 0.6em;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.leetglint-markdown th,
+.leetglint-markdown td {
+  padding: 0.32rem 0.5rem;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.leetglint-markdown th {
+  background: #10251f;
+  font-weight: 700;
+}
+
+.leetglint-markdown .katex {
+  font-size: 1.04em;
+}
+
+.leetglint-markdown .katex-display {
+  margin: 0.6em 0;
+  padding: 0.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leetglint-popover,
+  .leetglint-trigger-label,
+  .leetglint-trigger-spinner {
+    transition-duration: 1ms;
+  }
+
+  .leetglint-spinner * {
+    animation: none !important;
+  }
 }
 
 .leetglint-wrapper {
