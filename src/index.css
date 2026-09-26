@@ -88,11 +88,13 @@ select {
  * Clarify pill adopts LeetCode's own difficulty-pill styling, so the loading
  * state is layered on with a dedicated hook class instead of .leetglint-trigger.
  */
-.leetglint-clarify-trigger {
+.leetglint-clarify-trigger,
+.leetglint-pill-loading {
   position: relative;
 }
 
-.leetglint-clarify-trigger:disabled {
+.leetglint-clarify-trigger:disabled,
+.leetglint-pill-loading:disabled {
   cursor: progress;
 }
 
@@ -115,11 +117,13 @@ select {
   transition: opacity 120ms ease;
 }
 
-.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-label {
+.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-label,
+.leetglint-pill-loading[data-loading="true"] .leetglint-trigger-label {
   opacity: 0;
 }
 
-.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-spinner {
+.leetglint-clarify-trigger[data-loading="true"] .leetglint-trigger-spinner,
+.leetglint-pill-loading[data-loading="true"] .leetglint-trigger-spinner {
   opacity: 1;
 }
 
@@ -467,6 +471,16 @@ select {
   display: inline-flex;
   align-items: center;
   margin-left: 0.5rem;
+}
+
+/*
+ * Sits in the console toolbar next to the result icon button, which is a
+ * flex row with .ml-auto holding the right aligned icon buttons.
+ */
+.leetglint-wrong-answer-anchor {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .options-page,

@@ -1,8 +1,13 @@
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { collectProblemSnapshot } from "./domReaders";
 import { ClarifyButton } from "./ClarifyButton";
 import { HintButton } from "./HintButton";
-import { HINT_PROMPTS, CLARIFY_PROMPTS } from "../shared/prompts";
+import { createWrongAnswerButtonHost } from "./wrongAnswerButton";
+import {
+  HINT_PROMPTS,
+  CLARIFY_PROMPTS,
+  WRONG_ANSWER_HINT_PROMPT,
+} from "../shared/prompts";
 import { readSettings } from "../shared/storage";
 import "./markdownStyles";
 import "../index.css";
@@ -50,6 +55,15 @@ async function requestAi(
   return response.response ?? "No response generated.";
 }
 
+async function requireApiKey(): Promise<void> {
+  const settings = await readSettings();
+  if (!settings.apiKey) {
+    throw new Error(
+      "Add your API key on the LeetGlint options page before using this feature.",
+    );
+  }
+}
+
 function createApp() {
   const state = {
     clarityLevel: 0,
@@ -79,16 +93,41 @@ function createApp() {
     return `Problem statement: ${snapshot.problemText}\n\nUser code:\n${snapshot.code}\n\nFailing test data:\nInput: ${failingTest.input}\nExpected: ${failingTest.expected}\nActual: ${failingTest.actual}\n\nHint level ${level}. ${systemPrompt}`;
   }
 
+  /**
+   * The console grades a submission as Wrong Answer, so this prompt carries the
+   * statement, the exact submission and the failing test values. Four backticks
+   * fence the code so a nested triple-fence in the submission cannot end it.
+   */
+  function getWrongAnswerPrompt(level: number): string {
+    const snapshot = collectProblemSnapshot();
+    const failingTest = snapshot.failingTest ?? {
+      input: "N/A",
+      expected: "N/A",
+      actual: "N/A",
+    };
+
+    return [
+      `Problem statement: ${snapshot.problemText}`,
+      "",
+      "Submitted code:",
+      "````",
+      snapshot.code,
+      "````",
+      "",
+      "Verdict: Wrong Answer on at least one test case.",
+      `Failing test input: ${failingTest.input}`,
+      `Expected output: ${failingTest.expected}`,
+      `Actual output: ${failingTest.actual}`,
+      "",
+      `Hint level ${level}. ${WRONG_ANSWER_HINT_PROMPT}`,
+    ].join("\n");
+  }
+
   async function handleAction(
     kind: "clarify" | "hint",
     level: number,
   ): Promise<string> {
-    const settings = await readSettings();
-    if (!settings.apiKey) {
-      throw new Error(
-        "Add your API key on the LeetGlint options page before using this feature.",
-      );
-    }
+    await requireApiKey();
 
     const systemPrompt =
       kind === "clarify"
@@ -100,6 +139,16 @@ function createApp() {
       kind === "clarify" ? getClarifyPrompt(level) : getHintPrompt(level);
 
     return requestAi(kind, level, prompt, systemPrompt);
+  }
+
+  async function requestWrongAnswerHint(level: number): Promise<string> {
+    await requireApiKey();
+    return requestAi(
+      "hint",
+      level,
+      getWrongAnswerPrompt(level),
+      WRONG_ANSWER_HINT_PROMPT,
+    );
   }
 
   function refreshHintState() {
@@ -158,32 +207,55 @@ function createApp() {
       return;
     }
 
-    const panel = (
-      <HintButton
-        target="hint"
-        level={state.hintLevel + 1}
-        onRequest={handleAction}
-        disabled={state.isHintDisabled}
-      />
-    );
-
-    const hintAnchor = resultHeader.querySelector<HTMLElement>(
-      ".leetglint-hint-anchor",
-    );
-    if (hintAnchor) {
+    if (resultHeader.querySelector(".leetglint-hint-anchor")) {
       return;
     }
 
     const anchor = document.createElement("div");
     anchor.className = "leetglint-hint-anchor";
     resultHeader.appendChild(anchor);
-    createRoot(anchor).render(panel);
+    createRoot(anchor).render(
+      <HintButton
+        label={`Hint ${state.hintLevel + 1} of 3`}
+        onRequest={() => handleAction("hint", state.hintLevel + 1)}
+        disabled={state.isHintDisabled}
+      />,
+    );
+  }
+
+  /**
+   * The console icon and the Wrong Answer verdict are rendered together, so the
+   * button is reconciled with the verdict on every mutation instead of being
+   * injected once. Only one anchor can ever be mounted: createRoot() throws if
+   * it is called twice on the same node.
+   */
+  let wrongAnswerRoot: Root | null = null;
+  const wrongAnswerButton = createWrongAnswerButtonHost({
+    mount(anchor) {
+      wrongAnswerRoot = createRoot(anchor);
+      wrongAnswerRoot.render(
+        <HintButton
+          label="Hint"
+          onRequest={() => requestWrongAnswerHint(state.hintLevel + 1)}
+          disabled={state.isHintDisabled}
+        />,
+      );
+    },
+    unmount() {
+      wrongAnswerRoot?.unmount();
+      wrongAnswerRoot = null;
+    },
+  });
+
+  function syncHintButton() {
+    wrongAnswerButton.sync();
   }
 
   return {
     refreshHintState,
     attachClarify,
     attachHint,
+    syncHintButton,
     setHintLevel(nextLevel: number) {
       state.hintLevel = nextLevel;
     },
@@ -203,12 +275,14 @@ function setup() {
     app.refreshHintState();
     app.attachClarify();
     app.attachHint();
+    app.syncHintButton();
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
   app.refreshHintState();
   app.attachClarify();
   app.attachHint();
+  app.syncHintButton();
 }
 
 setup();
