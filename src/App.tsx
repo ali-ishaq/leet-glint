@@ -26,7 +26,7 @@ function App() {
       <main className="popup-page">
         <section className="card popup-card">
           <div className="brand-mark" aria-hidden="true">
-            L
+            <img src="/icons/icon128.png" alt="" />
           </div>
           <p className="eyebrow">LEETCODE COMPANION</p>
           <h1>LeetGlint</h1>
@@ -45,7 +45,7 @@ function App() {
             <h1>LeetGlint</h1>
           </div>
           <div className="brand-mark" aria-hidden="true">
-            L
+            <img src="/icons/icon128.png" alt="" />
           </div>
         </div>
 

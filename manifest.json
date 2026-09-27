@@ -3,6 +3,12 @@
   "name": "LeetGlint",
   "version": "1.0.0",
   "description": "One-nudge clarifications and context-aware debugging hints for LeetCode.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["storage"],
   "host_permissions": [
     "https://leetcode.com/*",
@@ -23,7 +29,11 @@
   ],
   "action": {
     "default_title": "LeetGlint",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
   },
   "options_ui": {
     "page": "options.html",

@@ -17,7 +17,7 @@ const providers = [
 const modelOptions: Record<ProviderName, string[]> = {
   gpt: ["gpt-4o-mini", "gpt-4.1-mini", "gpt-4o"],
   claude: ["claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
-  gemini: ["gemini-2.0-flash", "gemini-3.5-flash"],
+  gemini: ["gemini-3-flash-preview", "gemini-3.5-flash"],
 };
 
 function OptionsPage() {
