@@ -3,20 +3,26 @@ import { Astroid } from "lucide-react";
 import { Spinner } from "../components/Spinner";
 import { ResponsePopover } from "./ResponsePopover";
 import { useAnchoredPopover } from "./useAnchoredPopover";
+import { useDescriptionSelection } from "./useDescriptionSelection";
+
+type ClarifyScope = "description" | "selection";
 
 interface ClarifyResponse {
-  level: number;
+  scope: ClarifyScope;
   text: string;
   failed: boolean;
 }
 
 interface ClarifyButtonProps {
-  level: number;
-  onRequest: (kind: "clarify" | "hint", level: number) => Promise<string>;
+  onRequest: (selection: string | null) => Promise<string>;
 }
 
-export function ClarifyButton({ level, onRequest }: ClarifyButtonProps) {
-
+/**
+ * The single Clarify trigger. It clarifies the whole statement by default, and
+ * switches to the highlighted span while the reader has text selected in the
+ * description, so both modes share this button, its spinner and its popover.
+ */
+export function ClarifyButton({ onRequest }: ClarifyButtonProps) {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<ClarifyResponse | null>(null);
 
@@ -27,21 +33,26 @@ export function ClarifyButton({ level, onRequest }: ClarifyButtonProps) {
     panelRef,
   );
 
-  const label = `Clarify${level > 1 ? ` · ${level}` : ""}`;
+  const selection = useDescriptionSelection(anchorRef, panelRef);
+  const scope: ClarifyScope = selection ? "selection" : "description";
 
-  // A response only belongs to the level it was requested for, so a level
-  // change invalidates it without needing a reset effect.
-  const active = response?.level === level ? response : null;
+  const label = scope === "selection" ? "Clarify selection" : "Clarify";
+
+  // A response belongs to the scope it was requested for, so clearing the
+  // selection retires a selection answer instead of leaving it behind under a
+  // button that now says it clarifies the whole statement.
+  const active = response?.scope === scope ? response : null;
   const showPanel = panelOpen && active !== null;
 
-  async function request() {
+  async function request(quote: string | null) {
+    const targetScope: ClarifyScope = quote ? "selection" : "description";
     setLoading(true);
     try {
-      const text = await onRequest("clarify", level);
-      setResponse({ level, text, failed: false });
+      const text = await onRequest(quote);
+      setResponse({ scope: targetScope, text, failed: false });
     } catch (requestError) {
       setResponse({
-        level,
+        scope: targetScope,
         text:
           requestError instanceof Error
             ? requestError.message
@@ -70,7 +81,7 @@ export function ClarifyButton({ level, onRequest }: ClarifyButtonProps) {
       return;
     }
 
-    await request();
+    await request(selection);
     open();
   }
 
@@ -80,7 +91,7 @@ export function ClarifyButton({ level, onRequest }: ClarifyButtonProps) {
     }
     // The popover stays open and shows its own loading state, so the answer is
     // swapped in place rather than flashing closed and reopened.
-    await request();
+    await request(selection);
   }
 
   return (
@@ -93,6 +104,7 @@ export function ClarifyButton({ level, onRequest }: ClarifyButtonProps) {
         data-loading={loading || undefined}
         aria-busy={loading || undefined}
         aria-expanded={showPanel}
+        data-scope={scope}
       >
         <span className="leetglint-trigger-label">
           <span className="leetglint-trigger-icon">
@@ -108,7 +120,7 @@ export function ClarifyButton({ level, onRequest }: ClarifyButtonProps) {
         <ResponsePopover
           panelRef={panelRef}
           entered={entered}
-          title="Clarification"
+          title={active.scope === "selection" ? "Selected excerpt" : "Clarification"}
           loading={loading}
           failed={active.failed}
           text={active.text}

@@ -5,7 +5,6 @@ type MessageRequest = {
   type: "clarify" | "hint";
   systemPrompt: string;
   userPrompt: string;
-  level: number;
 };
 
 const runtime = chrome?.runtime;

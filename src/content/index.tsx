@@ -5,7 +5,8 @@ import { HintButton } from "./HintButton";
 import { createWrongAnswerButtonHost } from "./wrongAnswerButton";
 import {
   HINT_PROMPTS,
-  CLARIFY_PROMPTS,
+  CLARIFY_PROMPT,
+  CLARIFY_SELECTION_PROMPT,
   WRONG_ANSWER_HINT_PROMPT,
 } from "../shared/prompts";
 import { readSettings } from "../shared/storage";
@@ -23,7 +24,6 @@ function stableHash(value: string): string {
 
 async function requestAi(
   kind: "clarify" | "hint",
-  level: number,
   userPrompt: string,
   systemPrompt: string,
 ): Promise<string> {
@@ -39,7 +39,6 @@ async function requestAi(
       sendMessage(
         {
           type: kind,
-          level,
           systemPrompt,
           userPrompt,
         },
@@ -66,18 +65,32 @@ async function requireApiKey(): Promise<void> {
 
 function createApp() {
   const state = {
-    clarityLevel: 0,
     hintLevel: 0,
     hash: "",
     isHintDisabled: false,
   };
 
-  function getClarifyPrompt(level: number): string {
+  function getClarifyPrompt(): string {
     const snapshot = collectProblemSnapshot();
-    const systemPrompt =
-      CLARIFY_PROMPTS[level as keyof typeof CLARIFY_PROMPTS] ??
-      CLARIFY_PROMPTS[1];
-    return `Problem statement: ${snapshot.problemText}\n\nClarify level ${level}. ${systemPrompt}`;
+    return `Problem statement: ${snapshot.problemText}\n\n${CLARIFY_PROMPT}`;
+  }
+
+  /**
+   * A non-null selection is the mode switch: the statement is still sent whole,
+   * because the highlight gives the question its focus but the surrounding text
+   * is what makes the answer correct.
+   */
+  function getClarifySelectionPrompt(selectedText: string): string {
+    const snapshot = collectProblemSnapshot();
+
+    return [
+      `Problem statement: ${snapshot.problemText}`,
+      "",
+      "Text the developer highlighted:",
+      `> ${selectedText}`,
+      "",
+      CLARIFY_SELECTION_PROMPT,
+    ].join("\n");
   }
 
   function getHintPrompt(level: number): string {
@@ -98,7 +111,7 @@ function createApp() {
    * statement, the exact submission and the failing test values. Four backticks
    * fence the code so a nested triple-fence in the submission cannot end it.
    */
-  function getWrongAnswerPrompt(level: number): string {
+  function getWrongAnswerPrompt(): string {
     const snapshot = collectProblemSnapshot();
     const failingTest = snapshot.failingTest ?? {
       input: "N/A",
@@ -119,36 +132,34 @@ function createApp() {
       `Expected output: ${failingTest.expected}`,
       `Actual output: ${failingTest.actual}`,
       "",
-      `Hint level ${level}. ${WRONG_ANSWER_HINT_PROMPT}`,
+      WRONG_ANSWER_HINT_PROMPT,
     ].join("\n");
   }
 
-  async function handleAction(
-    kind: "clarify" | "hint",
-    level: number,
-  ): Promise<string> {
+  async function requestClarify(selection: string | null): Promise<string> {
+    await requireApiKey();
+
+    return selection
+      ? requestAi(
+          "clarify",
+          getClarifySelectionPrompt(selection),
+          CLARIFY_SELECTION_PROMPT,
+        )
+      : requestAi("clarify", getClarifyPrompt(), CLARIFY_PROMPT);
+  }
+
+  async function requestHint(level: number): Promise<string> {
     await requireApiKey();
 
     const systemPrompt =
-      kind === "clarify"
-        ? (CLARIFY_PROMPTS[level as keyof typeof CLARIFY_PROMPTS] ??
-          CLARIFY_PROMPTS[1])
-        : (HINT_PROMPTS[level as keyof typeof HINT_PROMPTS] ?? HINT_PROMPTS[1]);
+      HINT_PROMPTS[level as keyof typeof HINT_PROMPTS] ?? HINT_PROMPTS[1];
 
-    const prompt =
-      kind === "clarify" ? getClarifyPrompt(level) : getHintPrompt(level);
-
-    return requestAi(kind, level, prompt, systemPrompt);
+    return requestAi("hint", getHintPrompt(level), systemPrompt);
   }
 
-  async function requestWrongAnswerHint(level: number): Promise<string> {
+  async function requestWrongAnswerHint(): Promise<string> {
     await requireApiKey();
-    return requestAi(
-      "hint",
-      level,
-      getWrongAnswerPrompt(level),
-      WRONG_ANSWER_HINT_PROMPT,
-    );
+    return requestAi("hint", getWrongAnswerPrompt(), WRONG_ANSWER_HINT_PROMPT);
   }
 
   function refreshHintState() {
@@ -185,12 +196,7 @@ function createApp() {
     }
 
     if (!clarifyAnchor) {
-      createRoot(anchor).render(
-        <ClarifyButton
-          level={state.clarityLevel + 1}
-          onRequest={handleAction}
-        />,
-      );
+      createRoot(anchor).render(<ClarifyButton onRequest={requestClarify} />);
     }
   }
 
@@ -212,7 +218,7 @@ function createApp() {
     createRoot(anchor).render(
       <HintButton
         label={`Hint ${state.hintLevel + 1} of 3`}
-        onRequest={() => handleAction("hint", state.hintLevel + 1)}
+        onRequest={() => requestHint(state.hintLevel + 1)}
         disabled={state.isHintDisabled}
       />,
     );
@@ -231,7 +237,7 @@ function createApp() {
       wrongAnswerRoot.render(
         <HintButton
           label="Hint"
-          onRequest={() => requestWrongAnswerHint(state.hintLevel + 1)}
+          onRequest={requestWrongAnswerHint}
           disabled={state.isHintDisabled}
         />,
       );
@@ -253,9 +259,6 @@ function createApp() {
     syncHintButton,
     setHintLevel(nextLevel: number) {
       state.hintLevel = nextLevel;
-    },
-    setClarifyLevel(nextLevel: number) {
-      state.clarityLevel = nextLevel;
     },
     setHintDisabled(value: boolean) {
       state.isHintDisabled = value;
