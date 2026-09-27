@@ -88,10 +88,10 @@ select {
 }
 
 /*
- * Mirrors LeetCode's own Submit button: transparent background, action-green
- * text, and a faint tint of that same green on hover instead of a colour swap.
- * Rounded just enough to read as a related but distinct affordance, since
- * Submit itself is square.
+ * Mirrors LeetCode's own Submit button: action-green text on a faint
+ * translucent fill, darkening to a tint of that same green on hover rather
+ * than swapping hue. Rounded just enough to read as a related but distinct
+ * affordance, since Submit itself is square.
  */
 .leetglint-trigger {
   position: relative;
@@ -99,9 +99,10 @@ select {
   align-items: center;
   border: 0;
   border-radius: 6px;
-  background: transparent;
   color: var(--leetglint-action);
-  padding: 0.375rem 0.75rem;
+  background: rgb(255 255 255 / 6%);
+  padding-inline: 0.75rem;
+  padding-block: 0.375rem;
   font-family: inherit;
   font-weight: 500;
   white-space: nowrap;
@@ -112,8 +113,8 @@ select {
 }
 
 .leetglint-trigger:hover:not(:disabled) {
-  background: rgb(0 181 142 / 10%);
-  background: color-mix(in srgb, var(--leetglint-action) 10%, transparent);
+  background: rgb(255 255 255 / 6%);
+  background: color-mix(in srgb, var(--leetglint-action) 12%, transparent);
 }
 
 .leetglint-trigger:focus-visible {
@@ -126,17 +127,47 @@ select {
   cursor: progress;
 }
 
+/*
+ * line-height: 0 keeps the icon wrapper exactly as tall as the glyph, so it
+ * cannot drift from the text when the font size or icon size changes.
+ */
 .leetglint-trigger-icon {
   display: inline-flex;
   align-items: center;
-  margin-right: 0.5rem;
+  line-height: 0;
+  vertical-align: middle;
+  margin-right: 0.3rem;
 }
 
+/*
+ * A flex row, so the icon and the text are centred against each other's boxes
+ * instead of sharing a text baseline, which is what left them misaligned.
+ */
 .leetglint-trigger-label {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.25rem;
   transition: opacity 120ms ease;
+}
+
+/*
+ * Rotation only. The react-spinners ClipLoader this replaced animated
+ * rotate() together with scale(), so the glyph pumped in and out as it spun.
+ */
+.leetglint-loader {
+  animation: leetglint-spin 1s linear infinite;
+}
+
+@keyframes leetglint-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /*
@@ -467,13 +498,14 @@ select {
 
 @media (prefers-reduced-motion: reduce) {
   .leetglint-popover,
+  .leetglint-trigger,
   .leetglint-trigger-label,
   .leetglint-trigger-spinner {
     transition-duration: 1ms;
   }
 
-  .leetglint-spinner * {
-    animation: none !important;
+  .leetglint-loader {
+    animation: none;
   }
 }
 

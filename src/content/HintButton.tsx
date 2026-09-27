@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Lightbulb } from "lucide-react";
 import { Spinner } from "../components/Spinner";
 import { ResponsePopover } from "./ResponsePopover";
 import { useAnchoredPopover } from "./useAnchoredPopover";
@@ -13,26 +14,6 @@ interface HintButtonProps {
   onRequest: () => Promise<string>;
   label?: string;
   disabled?: boolean;
-}
-
-function HintIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M9.4 17.2h5.2" />
-      <path d="M10.2 20.4h3.6" />
-      <path d="M12 3.4a6 6 0 0 0-3.6 10.8c.5.4.8 1 .9 1.7h5.4c.1-.7.4-1.3.9-1.7A6 6 0 0 0 12 3.4Z" />
-    </svg>
-  );
 }
 
 export function HintButton({
@@ -109,7 +90,7 @@ export function HintButton({
       >
         <span className="leetglint-trigger-label">
           <span className="leetglint-trigger-icon">
-            <HintIcon />
+            <Lightbulb size={16} strokeWidth={2} aria-hidden="true" />
           </span>
           {label}
         </span>

@@ -1,4 +1,5 @@
 import { createPortal } from "react-dom";
+import { RefreshCw } from "lucide-react";
 import { Spinner } from "../components/Spinner";
 import { MarkdownAnswer } from "./MarkdownAnswer";
 
@@ -10,25 +11,6 @@ interface ResponsePopoverProps {
   failed: boolean;
   text: string;
   onRegenerate: () => void;
-}
-
-function RefreshIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20.5 12a8.5 8.5 0 1 1-2.9-6.4" />
-      <path d="M21 3v5h-5" />
-    </svg>
-  );
 }
 
 /**
@@ -66,7 +48,7 @@ export function ResponsePopover({
             <Spinner size={12} label="Regenerating" />
           ) : (
             <>
-              <RefreshIcon />
+              <RefreshCw size={12} strokeWidth={2.5} aria-hidden="true" />
               <span>Regenerate</span>
             </>
           )}
